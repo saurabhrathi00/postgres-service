@@ -1,0 +1,31 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    env_file:
+      - ./postgres-docker/.env
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./postgres-docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - online_multiplayer_game_network
+    shm_size: 256mb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  pg_data:
+
+networks:
+  online_multiplayer_game_network:
+    driver: bridge
